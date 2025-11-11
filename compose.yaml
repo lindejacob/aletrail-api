@@ -1,0 +1,7 @@
+﻿services:
+  aletrail-api:
+    image: aletrail-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+
