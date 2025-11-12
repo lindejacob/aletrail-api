@@ -1,7 +1,21 @@
-﻿services:
-  aletrail-api:
-    image: aletrail-api
-    build:
-      context: .
-      dockerfile: Dockerfile
+﻿version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=aletrail_user
+      - POSTGRES_DB=aletrail
+      - POSTGRES_PASSWORD=aletrail_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aletrail_user -d aletrail"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
+volumes:
+  postgres_data: {}
