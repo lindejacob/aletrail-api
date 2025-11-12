@@ -2,9 +2,11 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
+namespace aletrail_api.Models;
+
 [Index(nameof(Username), IsUnique = true)]
 [Index(nameof(Email), IsUnique = true)]
-public class UserModel
+public class User
 {
     [Key]
     public int Id { get; set; }
