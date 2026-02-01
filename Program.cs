@@ -1,11 +1,43 @@
 using Microsoft.EntityFrameworkCore;
 using aletrail_api.DAL;
 using System.IO;
+using System;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using aletrail_api.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+// Configure JWT settings and authentication
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+var jwtSection = builder.Configuration.GetSection("Jwt");
+var jwtKey = jwtSection["Key"] ?? Environment.GetEnvironmentVariable("JWT_KEY") ?? "ChangeThis_Default_ReplaceInProduction!";
+var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+        ValidateIssuer = !string.IsNullOrEmpty(jwtSection["Issuer"]),
+        ValidIssuer = jwtSection["Issuer"],
+        ValidateAudience = !string.IsNullOrEmpty(jwtSection["Audience"]),
+        ValidAudience = jwtSection["Audience"],
+        ClockSkew = TimeSpan.Zero
+    };
+});
 
 // Determine DB connection: prefer explicit CONNECTION_STRING env var, then Postgres secret file, then fallback to DefaultConnection (sqlite)
 var configuration = builder.Configuration;
@@ -103,6 +135,7 @@ else
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
