@@ -5,6 +5,6 @@ namespace aletrail_api.Services.Auth;
 
 public interface IAuthService
 {
-    UserDto? Login(UserLoginDto loginDto);
-    UserDto Register(UserCreateDto userCreateDto);
+    Task<string?> Login(UserLoginDto loginDto);
+    Task<int?> Register(UserCreateDto userCreateDto);
 }

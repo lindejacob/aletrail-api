@@ -6,11 +6,17 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using aletrail_api.Models;
+using aletrail_api.Services.Auth;
+using aletrail_api.Services.Jwt;
+using aletrail_api.Services.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Configure JWT settings and authentication
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));

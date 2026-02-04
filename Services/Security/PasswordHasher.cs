@@ -1,14 +1,14 @@
-namespace aletrail_api.Services.Jwt;
+namespace aletrail_api.Services.Security;
 
 public class PasswordHasher : IPasswordHasher
 {
     public string HashPassword(string password)
     {
-        throw new NotImplementedException();
+        return BCrypt.Net.BCrypt.HashPassword(password);
     }
 
-    public bool VerifyPassword(string hashedPassword, string providedPassword)
+    public bool VerifyPassword(string providedPassword, string hashedPassword)
     {
-        throw new NotImplementedException();
+        return BCrypt.Net.BCrypt.Verify(providedPassword, hashedPassword);
     }
 }
