@@ -7,4 +7,3 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<User> Users { get; set; } = null!;
 }
-
