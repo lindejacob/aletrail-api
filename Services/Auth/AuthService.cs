@@ -25,7 +25,7 @@ public class AuthService : IAuthService
     {
         var hashedUser = await _userRepository.getUserByEmailAsync(loginDto.Email);
         if (hashedUser == null) return null;
-        if (_passwordHasher.VerifyPassword(hashedUser.PasswordHash, loginDto.Password))
+        if (_passwordHasher.VerifyPassword(loginDto.Password, hashedUser.PasswordHash))
         {
             var token = _jwtService.GenerateJWTToken(hashedUser);
             return token;
@@ -35,15 +35,16 @@ public class AuthService : IAuthService
 
     public async Task<int?> Register(UserCreateDto userCreateDto)
     {
-        // if (await _userRepository.UsernameExistsAsync(userCreateDto.Username))
-        // {
-        //     throw new Exception("Username already exists");
-        // }
-        // if (await _userRepository.EmailExistsAsync(userCreateDto.Email))
-        // {
-        //     throw new Exception("Email already exists");
-        // }
+        if (await _userRepository.UsernameExistsAsync(userCreateDto.Username))
+        {
+            throw new Exception("Username already exists");
+        }
+        if (await _userRepository.EmailExistsAsync(userCreateDto.Email))
+        {
+            throw new Exception("Email already exists");
+        }
         var user = UserCreateDtoMapper.ToUser(userCreateDto);
+        user.PasswordHash = _passwordHasher.HashPassword(userCreateDto.Password);
         var userId = await _userRepository.insertUserAsync(user);
         return userId;
     }
