@@ -1,46 +1,62 @@
 using aletrail_api.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace aletrail_api.DAL.Account;
 
 public class UserRepository : IUserRepository
 {
-    public Task<IEnumerable<User>> getAllUsersAsync()
+    private readonly ApplicationDbContext _dbContext;
+    
+    public UserRepository(ApplicationDbContext dbContext)
     {
-        throw new NotImplementedException();
+        _dbContext = dbContext;
+    }
+    
+    public async Task<IEnumerable<User>> getAllUsersAsync()
+    {
+        return await _dbContext.Users.OrderBy(u => u.Username).ToListAsync();
     }
 
-    public Task<User?> getUserByIdAsync(int id)
+    public async Task<User?> getUserByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
     }
 
-    public Task<User?> getUserByEmailAsync(string email)
+    public async Task<User?> getUserByEmailAsync(string email)
     {
-        throw new NotImplementedException();
+        return await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
     }
 
-    public Task<bool> EmailExistsAsync(string email)
+    public async Task<bool> EmailExistsAsync(string email)
     {
-        throw new NotImplementedException();
+        return await _dbContext.Users.AnyAsync(u => u.Email == email);
     }
 
-    public Task<bool> UsernameExistsAsync(string username)
+    public async Task<bool> UsernameExistsAsync(string username)
     {
-        throw new NotImplementedException();
+        return await _dbContext.Users.AnyAsync(u => u.Username == username);
     }
 
-    public Task<int> insertUserAsync(User user)
+    public async Task<int> insertUserAsync(User user)
     {
-        throw new NotImplementedException();
+        _dbContext.Users.Add(user);
+        await _dbContext.SaveChangesAsync();
+        return user.Id;
     }
 
-    public Task<int> updateUserAsync(User user)
+    public async Task<int> updateUserAsync(User user)
     {
-        throw new NotImplementedException();
+        _dbContext.Users.Update(user);
+        return await _dbContext.SaveChangesAsync();
     }
 
-    public Task<int> deleteUserAsync(int id)
+    public async Task<int> deleteUserAsync(int id)
     {
-        throw new NotImplementedException();
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
+        if (user == null)
+            return 0;
+        
+        _dbContext.Users.Remove(user);
+        return await _dbContext.SaveChangesAsync();
     }
 }

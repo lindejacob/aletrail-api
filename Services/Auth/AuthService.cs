@@ -35,14 +35,14 @@ public class AuthService : IAuthService
 
     public async Task<int?> Register(UserCreateDto userCreateDto)
     {
-        if (await _userRepository.UsernameExistsAsync(userCreateDto.Username))
-        {
-            throw new Exception("Username already exists");
-        }
-        if (await _userRepository.EmailExistsAsync(userCreateDto.Email))
-        {
-            throw new Exception("Email already exists");
-        }
+        // if (await _userRepository.UsernameExistsAsync(userCreateDto.Username))
+        // {
+        //     throw new Exception("Username already exists");
+        // }
+        // if (await _userRepository.EmailExistsAsync(userCreateDto.Email))
+        // {
+        //     throw new Exception("Email already exists");
+        // }
         var user = UserCreateDtoMapper.ToUser(userCreateDto);
         var userId = await _userRepository.insertUserAsync(user);
         return userId;
