@@ -3,4 +3,6 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
-appsettings.development.json
+*.DotSettings.user
+.idea/
+appsettings.Development.json
