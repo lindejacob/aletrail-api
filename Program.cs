@@ -17,6 +17,8 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<aletrail_api.Services.PubCrawl.IRouteCalculationService, aletrail_api.Services.PubCrawl.RouteCalculationService>();
+builder.Services.AddScoped<aletrail_api.Services.PubCrawl.IPubCrawlService, aletrail_api.Services.PubCrawl.PubCrawlService>();
 
 // Configure JWT settings and authentication
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));

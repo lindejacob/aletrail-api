@@ -47,6 +47,136 @@ namespace aletrail_api.Migrations
                     b.ToTable("Bars");
                 });
 
+            modelBuilder.Entity("aletrail_api.Models.Challenge", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("Points")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Challenges");
+                });
+
+            modelBuilder.Entity("aletrail_api.Models.PubCrawlParticipant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("PubCrawlRouteId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("PubCrawlRouteId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("PubCrawlParticipants");
+                });
+
+            modelBuilder.Entity("aletrail_api.Models.PubCrawlRoute", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CreatedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("InviteCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("InviteCode")
+                        .IsUnique();
+
+                    b.ToTable("PubCrawlRoutes");
+                });
+
+            modelBuilder.Entity("aletrail_api.Models.RouteStop", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<long>("BarOsmId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int?>("ChallengeId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PubCrawlRouteId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BarOsmId");
+
+                    b.HasIndex("ChallengeId");
+
+                    b.HasIndex("PubCrawlRouteId", "OrderIndex")
+                        .IsUnique();
+
+                    b.ToTable("RouteStops");
+                });
+
             modelBuilder.Entity("aletrail_api.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -76,6 +206,74 @@ namespace aletrail_api.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("aletrail_api.Models.PubCrawlParticipant", b =>
+                {
+                    b.HasOne("aletrail_api.Models.PubCrawlRoute", "PubCrawlRoute")
+                        .WithMany("Participants")
+                        .HasForeignKey("PubCrawlRouteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("aletrail_api.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PubCrawlRoute");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("aletrail_api.Models.PubCrawlRoute", b =>
+                {
+                    b.HasOne("aletrail_api.Models.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+                });
+
+            modelBuilder.Entity("aletrail_api.Models.RouteStop", b =>
+                {
+                    b.HasOne("aletrail_api.Models.Bar", "Bar")
+                        .WithMany()
+                        .HasForeignKey("BarOsmId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("aletrail_api.Models.Challenge", "Challenge")
+                        .WithMany("RouteStops")
+                        .HasForeignKey("ChallengeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("aletrail_api.Models.PubCrawlRoute", "PubCrawlRoute")
+                        .WithMany("Stops")
+                        .HasForeignKey("PubCrawlRouteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Bar");
+
+                    b.Navigation("Challenge");
+
+                    b.Navigation("PubCrawlRoute");
+                });
+
+            modelBuilder.Entity("aletrail_api.Models.Challenge", b =>
+                {
+                    b.Navigation("RouteStops");
+                });
+
+            modelBuilder.Entity("aletrail_api.Models.PubCrawlRoute", b =>
+                {
+                    b.Navigation("Participants");
+
+                    b.Navigation("Stops");
                 });
 #pragma warning restore 612, 618
         }
