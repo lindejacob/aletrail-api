@@ -8,6 +8,7 @@ using aletrail_api.Services.Auth;
 using aletrail_api.Services.Jwt;
 using aletrail_api.Services.Security;
 using aletrail_api.DAL.Account;
+using aletrail_api.Services.PointOfInterest;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,6 +84,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Register IUserRepository implementation (now uses EF Core DbContext with fallback support)
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IPOIService, POIService>();
+builder.Services.AddHttpClient("overpass", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(120);
+});
+builder.Services.AddHostedService<BarSyncBackgroundService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
