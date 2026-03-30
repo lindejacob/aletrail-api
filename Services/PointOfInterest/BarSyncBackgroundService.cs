@@ -20,7 +20,7 @@ public class BarSyncBackgroundService : BackgroundService
         "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
     ];
 
-    public BarSyncBackgroundService(IServiceProvider serviceProvider, ILogger<BarSyncBackgroundService> logger)
+    public BarSyncBackgroundService(IServiceProvider serviceProvider, ILogger<BarSyncBackgroundService> logger, IHostEnvironment env)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
@@ -43,6 +43,27 @@ public class BarSyncBackgroundService : BackgroundService
         {
             using var scope = _serviceProvider.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            if (_env.IsDevelopment())
+            {
+                var firstBar = await dbContext.Bars
+                    .OrderBy(b => b.OsmId)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (firstBar != null)
+                {
+                    var timeSinceSync = DateTime.UtcNow - firstBar.SyncedAt;
+                    if (timeSinceSync < SyncInterval)
+                    {
+                        _logger.LogInformation(
+                            "Skipping sync in development. Last sync was {Hours:F1} hours ago (interval: {IntervalHours} hours)",
+                            timeSinceSync.TotalHours,
+                            SyncInterval.TotalHours);
+                        return;
+                    }
+                }
+            }
+
             var httpClientFactory = scope.ServiceProvider.GetRequiredService<IHttpClientFactory>();
             var httpClient = httpClientFactory.CreateClient("overpass");
 

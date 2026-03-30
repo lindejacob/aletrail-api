@@ -44,7 +44,7 @@ namespace aletrail_api.Migrations
 
                     b.HasKey("OsmId");
 
-                    b.ToTable("Bars");
+                    b.ToTable("Bars", (string)null);
                 });
 
             modelBuilder.Entity("aletrail_api.Models.Challenge", b =>
@@ -74,7 +74,7 @@ namespace aletrail_api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Challenges");
+                    b.ToTable("Challenges", (string)null);
                 });
 
             modelBuilder.Entity("aletrail_api.Models.PubCrawlParticipant", b =>
@@ -101,7 +101,7 @@ namespace aletrail_api.Migrations
                     b.HasIndex("PubCrawlRouteId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("PubCrawlParticipants");
+                    b.ToTable("PubCrawlParticipants", (string)null);
                 });
 
             modelBuilder.Entity("aletrail_api.Models.PubCrawlRoute", b =>
@@ -139,7 +139,7 @@ namespace aletrail_api.Migrations
                     b.HasIndex("InviteCode")
                         .IsUnique();
 
-                    b.ToTable("PubCrawlRoutes");
+                    b.ToTable("PubCrawlRoutes", (string)null);
                 });
 
             modelBuilder.Entity("aletrail_api.Models.RouteStop", b =>
@@ -174,7 +174,7 @@ namespace aletrail_api.Migrations
                     b.HasIndex("PubCrawlRouteId", "OrderIndex")
                         .IsUnique();
 
-                    b.ToTable("RouteStops");
+                    b.ToTable("RouteStops", (string)null);
                 });
 
             modelBuilder.Entity("aletrail_api.Models.User", b =>
@@ -205,7 +205,7 @@ namespace aletrail_api.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("aletrail_api.Models.PubCrawlParticipant", b =>

@@ -54,7 +54,7 @@ public class PubCrawlService : IPubCrawlService
 
         await _context.SaveChangesAsync();
 
-        return await GetRouteByIdAsync(route.Id, userId) 
+        return await GetRouteByIdAsync(route.Id, userId)
             ?? throw new Exception("Failed to retrieve created route");
     }
 
@@ -64,18 +64,18 @@ public class PubCrawlService : IPubCrawlService
         double centerLon = (dto.StartLongitude + dto.EndLongitude) / 2;
 
         var allBars = await _context.Bars.ToListAsync();
-        
+
         double distance = _routeCalc.CalculateDistance(
             dto.StartLatitude, dto.StartLongitude,
             dto.EndLatitude, dto.EndLongitude
         );
         double searchRadius = Math.Max(distance * 0.75, 5.0);
-        
+
         var candidateBars = _routeCalc.FindNearbyBars(
-            allBars, 
-            centerLat, 
-            centerLon, 
-            searchRadius, 
+            allBars,
+            centerLat,
+            centerLon,
+            searchRadius,
             Math.Min(dto.NumberOfBars * 3, 100)
         );
 
@@ -85,7 +85,7 @@ public class PubCrawlService : IPubCrawlService
         }
 
         var selectedBars = candidateBars.Take(dto.NumberOfBars).ToList();
-        
+
         var optimizedBars = _routeCalc.OptimizeRoute(
             selectedBars,
             dto.StartLatitude,
@@ -147,7 +147,7 @@ public class PubCrawlService : IPubCrawlService
 
         var orderedStops = route.Stops.OrderBy(s => s.OrderIndex).ToList();
         var bars = orderedStops.Select(s => s.Bar).ToList();
-        var totalDistance = _routeCalc.CalculateTotalDistance(bars);
+        var totalDistance = bars.Count > 0 ? _routeCalc.CalculateTotalDistance(bars, bars[0].Latitude, bars[0].Longitude, bars[bars.Count - 1].Latitude, bars[bars.Count - 1].Longitude) : 0;
 
         return new PubCrawlRouteDto
         {
@@ -193,7 +193,7 @@ public class PubCrawlService : IPubCrawlService
     {
         var ownedRoutes = _context.PubCrawlRoutes
             .Where(r => r.CreatedByUserId == userId);
-        
+
         var participantRoutes = _context.PubCrawlRoutes
             .Where(r => r.Participants.Any(p => p.UserId == userId));
 
@@ -217,7 +217,7 @@ public class PubCrawlService : IPubCrawlService
             bool isOwner = route.CreatedByUserId == userId;
             var orderedStops = route.Stops.OrderBy(s => s.OrderIndex).ToList();
             var bars = orderedStops.Select(s => s.Bar).ToList();
-            var totalDistance = _routeCalc.CalculateTotalDistance(bars);
+            var totalDistance = bars.Count > 0 ? _routeCalc.CalculateTotalDistance(bars, bars[0].Latitude, bars[0].Longitude, bars[bars.Count - 1].Latitude, bars[bars.Count - 1].Longitude) : 0;
 
             return new PubCrawlRouteDto
             {
@@ -269,7 +269,7 @@ public class PubCrawlService : IPubCrawlService
 
         if (dto.Name != null) route.Name = dto.Name;
         if (dto.Description != null) route.Description = dto.Description;
-        
+
         route.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
@@ -303,7 +303,7 @@ public class PubCrawlService : IPubCrawlService
             throw new Exception($"Bar with OSM ID {dto.BarOsmId} not found");
 
         int orderIndex = dto.OrderIndex ?? route.Stops.Count;
-        
+
         var existingStops = await _context.RouteStops
             .Where(s => s.PubCrawlRouteId == routeId && s.OrderIndex >= orderIndex)
             .ToListAsync();
@@ -324,7 +324,7 @@ public class PubCrawlService : IPubCrawlService
 
         _context.RouteStops.Add(newStop);
         route.UpdatedAt = DateTime.UtcNow;
-        
+
         await _context.SaveChangesAsync();
 
         return await GetRouteByIdAsync(routeId, userId);
@@ -344,7 +344,7 @@ public class PubCrawlService : IPubCrawlService
         if (stop == null) return false;
 
         int deletedOrderIndex = stop.OrderIndex;
-        
+
         _context.RouteStops.Remove(stop);
 
         var stopsToReorder = await _context.RouteStops
@@ -401,7 +401,7 @@ public class PubCrawlService : IPubCrawlService
 
         route.InviteCode = GenerateInviteCode();
         route.UpdatedAt = DateTime.UtcNow;
-        
+
         await _context.SaveChangesAsync();
 
         return route.InviteCode;
